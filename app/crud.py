@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Game
+from app.models import Game, GameStatus, LinuxCompat
 from app.schemas import GameCreate, GameUpdate
 
 CLEARABLE_FIELDS = {"genre", "rating", "notes"}
@@ -19,8 +19,24 @@ def get_game(db: Session, game_id: int) -> Game | None:
     return db.get(Game, game_id)
 
 
-def get_games(db: Session, skip: int = 0, limit: int = 20) -> list[Game]:
-    statement = select(Game).order_by(Game.id).offset(skip).limit(limit)
+def get_games(
+    db: Session,
+    skip: int = 0,
+    limit: int = 20,
+    status: GameStatus | None = None,
+    genre: str | None = None,
+    linux_compat: LinuxCompat | None = None,
+) -> list[Game]:
+    statement = select(Game)
+
+    if status is not None:
+        statement = statement.where(Game.status == status)
+    if genre is not None:
+        statement = statement.where(Game.genre == genre)
+    if linux_compat is not None:
+        statement = statement.where(Game.linux_compat == linux_compat)
+
+    statement = statement.order_by(Game.id).offset(skip).limit(limit)
     return list(db.scalars(statement).all())
 
 

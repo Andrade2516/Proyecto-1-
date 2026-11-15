@@ -1,15 +1,22 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Query,
+    Response,
+    status as http_status,
+)
 from sqlalchemy.orm import Session
 
 from app import crud
 from app.database import get_db
-from app.models import Game
+from app.models import Game, GameStatus, LinuxCompat
 from app.schemas import GameCreate, GameRead, GameUpdate
 
 router = APIRouter(prefix="/games", tags=["games"])
 
 
-@router.post("", response_model=GameRead, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=GameRead, status_code=http_status.HTTP_201_CREATED)
 def create_game(game_in: GameCreate, db: Session = Depends(get_db)) -> Game:
     return crud.create_game(db, game_in)
 
@@ -18,9 +25,19 @@ def create_game(game_in: GameCreate, db: Session = Depends(get_db)) -> Game:
 def list_games(
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=100),
+    status: GameStatus | None = Query(default=None),
+    genre: str | None = Query(default=None, min_length=1, max_length=50),
+    linux_compat: LinuxCompat | None = Query(default=None),
     db: Session = Depends(get_db),
 ) -> list[Game]:
-    return crud.get_games(db, skip=skip, limit=limit)
+    return crud.get_games(
+        db,
+        skip=skip,
+        limit=limit,
+        status=status,
+        genre=genre,
+        linux_compat=linux_compat,
+    )
 
 
 @router.get("/{game_id}", response_model=GameRead)
@@ -28,7 +45,7 @@ def get_game(game_id: int, db: Session = Depends(get_db)) -> Game:
     game = crud.get_game(db, game_id)
     if game is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=http_status.HTTP_404_NOT_FOUND,
             detail="Game not found",
         )
     return game
@@ -43,17 +60,17 @@ def update_game(
     game = crud.update_game(db, game_id, game_in)
     if game is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=http_status.HTTP_404_NOT_FOUND,
             detail="Game not found",
         )
     return game
 
 
-@router.delete("/{game_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{game_id}", status_code=http_status.HTTP_204_NO_CONTENT)
 def delete_game(game_id: int, db: Session = Depends(get_db)) -> Response:
     if not crud.delete_game(db, game_id):
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=http_status.HTTP_404_NOT_FOUND,
             detail="Game not found",
         )
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return Response(status_code=http_status.HTTP_204_NO_CONTENT)
