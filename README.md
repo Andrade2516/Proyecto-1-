@@ -226,4 +226,4 @@ Los tests usan una base SQLite en memoria, así que no tocan `game_backlog.db`. 
 **Daniel Andrade** — estudiante de Ingeniería en Ciencias Informáticas (UCI).
 
 - GitHub: [@Andrade2516](https://github.com/Andrade2516)
-- LinkedIn: pendiente de añadir
+- LinkedIn: www.linkedin.com/in/daniel-hernandez-b128753a2
