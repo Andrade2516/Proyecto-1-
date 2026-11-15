@@ -1,0 +1,50 @@
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.models import Game
+from app.schemas import GameCreate, GameUpdate
+
+CLEARABLE_FIELDS = {"genre", "rating", "notes"}
+
+
+def create_game(db: Session, game_in: GameCreate) -> Game:
+    game = Game(**game_in.model_dump())
+    db.add(game)
+    db.commit()
+    db.refresh(game)
+    return game
+
+
+def get_game(db: Session, game_id: int) -> Game | None:
+    return db.get(Game, game_id)
+
+
+def get_games(db: Session, skip: int = 0, limit: int = 20) -> list[Game]:
+    statement = select(Game).order_by(Game.id).offset(skip).limit(limit)
+    return list(db.scalars(statement).all())
+
+
+def update_game(db: Session, game_id: int, game_in: GameUpdate) -> Game | None:
+    game = get_game(db, game_id)
+    if game is None:
+        return None
+
+    update_data = game_in.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        if value is None and field not in CLEARABLE_FIELDS:
+            continue
+        setattr(game, field, value)
+
+    db.commit()
+    db.refresh(game)
+    return game
+
+
+def delete_game(db: Session, game_id: int) -> bool:
+    game = get_game(db, game_id)
+    if game is None:
+        return False
+
+    db.delete(game)
+    db.commit()
+    return True
