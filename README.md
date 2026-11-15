@@ -212,7 +212,7 @@ pytest -q
 
 Los tests usan una base SQLite en memoria, así que no tocan `game_backlog.db`. Actualmente son **22 tests** que cubren el CRUD, las validaciones, los filtros, la paginación y las estadísticas.
 
-## Posibles mejoras
+## Mejoras a Futuro
 
 - Migrar a PostgreSQL
 - Añadir Docker
