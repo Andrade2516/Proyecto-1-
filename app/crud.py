@@ -19,6 +19,11 @@ def get_game(db: Session, game_id: int) -> Game | None:
     return db.get(Game, game_id)
 
 
+def get_all_games(db: Session) -> list[Game]:
+    statement = select(Game).order_by(Game.id)
+    return list(db.scalars(statement).all())
+
+
 def get_games(
     db: Session,
     skip: int = 0,

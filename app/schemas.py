@@ -41,3 +41,21 @@ class GameRead(GameBase):
     id: int
     created_at: datetime
     updated_at: datetime
+
+
+class StatsSummary(BaseModel):
+    total_games: int
+    total_hours: float
+    average_rating: float | None
+
+
+class GenreStats(BaseModel):
+    genre: str
+    total_games: int
+    total_hours: float
+
+
+class LinuxCompatStats(BaseModel):
+    linux_compat: LinuxCompat
+    total_games: int
+    percentage: float
